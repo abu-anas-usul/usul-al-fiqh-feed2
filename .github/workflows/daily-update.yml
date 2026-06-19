@@ -1,1 +1,28 @@
+name: Daily Research Update
 
+on:
+  schedule:
+    - cron: '0 4 * * *'  # 7 صباحاً بتوقيت السعودية = 4 صباحاً UTC
+  workflow_dispatch:  # للتشغيل اليدوي
+
+jobs:
+  update-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Generate RSS Feed
+        run: python generate_feed.py
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add feed.xml
+          git diff --quiet && git diff --staged --quiet || (git commit -m "تحديث يومي للخلاصات" && git push)
